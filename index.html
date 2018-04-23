@@ -1,23 +1,6 @@
 <!DOCTYPE html>
-
-<head>
-	<script type="text/javascript">
-//======================================================================//
-window.onload=main;
-
-function main(){
-	const canvas=document.getElementById('canvas');
-	const gl=canvas.getContext('webgl');
-	if(!gl){
-		alert('unable to initialize WebGL');
-		return;
-	}
-	gl.clearColor(1.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT);
-}
-//======================================================================//
-	</script>
-</head>
+<script src="gl-matrix.js"></script>
+<script src="main.js"></script>
 <body>
 	<canvas id="canvas" width="640" height="480"/>
 </body>
