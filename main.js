@@ -48,21 +48,39 @@ function main(){
 }
 
 function initBuffers(gl){
+	var positions=[];
+	var indices=[];
+	var firstRow=true;
+	var verticesPerRow=null;
+	for(var z=-100; z<=100; z+=10){
+		var firstCol=true;
+		for(var x=-100; x<=100; x+=10){
+			positions=positions.concat([x, -5, z]);
+			if(!firstRow&&!firstCol){
+				const k=positions.length/3-1;
+				const r=verticesPerRow;
+				indices=indices.concat([
+					k-r-1, k-r, k,
+					k-r-1, k  , k-1
+				]);
+			}
+			firstCol=false;
+		}
+		if(firstRow){
+			verticesPerRow=positions.length/3;
+			firstRow=false;
+		}
+	}
+
+	console.log(positions)
+	console.log(indices)
+
 	const positionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-	const positions=[
-		-100.0, -1.0, -100.0,
-		 100.0, -1.0, -100.0,
-		 100.0, -1.0,  100.0,
-		-100.0, -1.0,  100.0,
-	];
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
 	const indexBuffer=gl.createBuffer();
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-	const indices=[
-		0, 1, 2,  0, 2, 3,
-	];
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
 	return {
