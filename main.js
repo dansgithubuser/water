@@ -17,7 +17,19 @@ function main(){
 		uniform float uTime;
 
 		void main(void){
-			gl_Position=uProjectionMatrix*uModelViewMatrix*aVertexPosition+vec4(0.0, uTime, 0.0, 0.0);
+			const float qh=0.5;
+			const float a=1.0;
+			const float w=1.0;
+			const vec2 d=vec2(1.0, 0.0);
+			const float phi=1.0;
+			const float q=qh/(w*a);
+			float angle=dot(w*d, aVertexPosition.xz)+phi*uTime;
+			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(
+				q*a*d.x*cos(angle),
+				a*sin(angle),
+				q*a*d.y*cos(angle),
+				0.0
+			));
 		}`;
 
 	const fsSource=`
