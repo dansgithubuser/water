@@ -29,7 +29,7 @@ function main(){
 		uniform sampler2D uSampler;
 
 		void main(void){
-			gl_FragColor=texture2D(uSampler, vTextureCoord);
+			gl_FragColor=vec4(0.0, 1.0, 0.0, 1.0);
 		}`;
 
 	const shaderProgram=initShaderProgram(gl, vsSource, fsSource);
@@ -150,7 +150,7 @@ function drawScene(gl, programInfo, buffers, texture){
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
-	gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.LINE_STRIP, 6, gl.UNSIGNED_SHORT, 0);
 }
 
 function initShaderProgram(gl, vsSource, fsSource){
