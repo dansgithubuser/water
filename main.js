@@ -26,7 +26,7 @@ function main(){
 			float angle=dot(w*d, aVertexPosition.xz)+phi*uTime;
 			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(
 				q*a*d.x*cos(angle),
-				a*sin(angle),
+				-a*sin(angle),
 				q*a*d.y*cos(angle),
 				0.0
 			));
