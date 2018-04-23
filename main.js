@@ -14,9 +14,10 @@ function main(){
 
 		uniform mat4 uModelViewMatrix;
 		uniform mat4 uProjectionMatrix;
+		uniform float uTime;
 
 		void main(void){
-			gl_Position=uProjectionMatrix*uModelViewMatrix*aVertexPosition;
+			gl_Position=uProjectionMatrix*uModelViewMatrix*aVertexPosition+vec4(0.0, uTime, 0.0, 0.0);
 		}`;
 
 	const fsSource=`
@@ -35,13 +36,14 @@ function main(){
 		uniformLocations: {
 			projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
 			modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
-			uSampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+			time: gl.getUniformLocation(shaderProgram, 'uTime'),
+			sampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
 		},
 	};
 	const buffers=initBuffers(gl);
 	const texture=loadTexture(gl, 'background.png');
-	function render(now){
-		drawScene(gl, programInfo, buffers, texture);
+	function render(timeMs){
+		drawScene(gl, programInfo, buffers, texture, timeMs/1000);
 		requestAnimationFrame(render);
 	}
 	requestAnimationFrame(render);
@@ -71,9 +73,6 @@ function initBuffers(gl){
 			firstRow=false;
 		}
 	}
-
-	console.log(positions)
-	console.log(indices)
 
 	const positionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
@@ -122,7 +121,7 @@ function loadTexture(gl, url){
 	return texture;
 }
 
-function drawScene(gl, programInfo, buffers, texture){
+function drawScene(gl, programInfo, buffers, texture, time){
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -146,9 +145,11 @@ function drawScene(gl, programInfo, buffers, texture){
 	gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 	gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
 
+	gl.uniform1f(programInfo.uniformLocations.time, time);
+
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, texture);
-	gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
+	gl.uniform1i(programInfo.uniformLocations.sampler, 0);
 
 	gl.drawElements(gl.LINE_STRIP, buffers.indicesSize, gl.UNSIGNED_SHORT, 0);
 }
@@ -175,7 +176,10 @@ function loadShader(gl, type, source){
 	gl.shaderSource(shader, source);
 	gl.compileShader(shader);
 	if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)){
-		alert('error compiling shaders: '+gl.getShaderInfoLog(shader));
+		var typeS=null;
+		if(type==gl.VERTEX_SHADER) typeS='vertex';
+		if(type==gl.FRAGMENT_SHADER) typeS='fragment';
+		alert('error compiling '+typeS+' shader: '+gl.getShaderInfoLog(shader));
 		gl.deleteShader(shader);
 		return null;
 	}
