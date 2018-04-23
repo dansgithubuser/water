@@ -85,6 +85,7 @@ function initBuffers(gl){
 		position: positionBuffer,
 		textureCoord: textureCoordBuffer,
 		indices: indexBuffer,
+		indicesSize: indices.length,
 	};
 }
 
@@ -150,7 +151,7 @@ function drawScene(gl, programInfo, buffers, texture){
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.uniform1i(programInfo.uniformLocations.uSampler, 0);
 
-	gl.drawElements(gl.LINE_STRIP, 6, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.LINE_STRIP, buffers.indicesSize, gl.UNSIGNED_SHORT, 0);
 }
 
 function initShaderProgram(gl, vsSource, fsSource){
