@@ -12,12 +12,14 @@ function main(){
 	const vsSource=`
 		attribute vec4 aVertexPosition;
 
+		uniform mat4 uNormalMatrix;
 		uniform mat4 uModelViewMatrix;
 		uniform mat4 uProjectionMatrix;
 		uniform float uTime;
 		uniform float uWaves[6*8];
 
 		varying highp vec3 vNormal;
+		varying highp vec4 vPosition;
 
 		void main(void){
 			vNormal=vec3(0.0, 0.0, 0.0);
@@ -48,16 +50,30 @@ function main(){
 				1.0-vNormal.y,
 				vNormal.z
 			);
-			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(offset, 0.0));
+			vNormal=(uNormalMatrix*vec4(vNormal, 1.0)).xyz;
+			vPosition=uModelViewMatrix*(aVertexPosition+vec4(offset, 0.0));
+			gl_Position=uProjectionMatrix*vPosition;
 		}`;
 
 	const fsSource=`
 		varying highp vec3 vNormal;
+		varying highp vec4 vPosition;
 
 		uniform sampler2D uSampler;
 
 		void main(void){
-			gl_FragColor=vec4((vec3(vNormal.x, vNormal.y, 0.0)+vec3(0.0, 0.0, 0.0))/2.0, 1.0);
+			//reflect eye-to-fragment by normal
+			highp vec3 reflected=reflect(vPosition.xyz, vNormal);
+			//background is plane that contains point (0, 0, -100) and has normal (0, 0, 1)
+			const highp vec3 p0=vec3(0.0, 0.0, -100.0);
+			const highp vec3 n=vec3(0.0, 0.0, 1.0);
+			//intersect this plane with line that starts at vPosition and travels in reflected direction
+			highp float d=dot((p0-vPosition.xyz), n)/dot(reflected, n);
+			gl_FragColor=vec4(0.0, 0.0, 0.0, 1.0);
+			if(d>0.0) gl_FragColor=texture2D(uSampler, vec2(
+				 (vPosition.x+d*reflected.x)/120.0+0.5,
+				-(vPosition.y+d*reflected.y)/ 60.0+0.5+0.1
+			));
 		}`;
 
 	const shaderProgram=initShaderProgram(gl, vsSource, fsSource);
@@ -69,6 +85,7 @@ function main(){
 		uniformLocations: {
 			projectionMatrix: gl.getUniformLocation(shaderProgram, 'uProjectionMatrix'),
 			modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
+			normalMatrix: gl.getUniformLocation(shaderProgram, 'uNormalMatrix'),
 			time: gl.getUniformLocation(shaderProgram, 'uTime'),
 			sampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
 			waves: gl.getUniformLocation(shaderProgram, 'uWaves'),
@@ -183,6 +200,11 @@ function drawScene(gl, programInfo, buffers, texture, time){
 
 	mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 	const modelViewMatrix=mat4.create();
+	mat4.rotate(modelViewMatrix, modelViewMatrix, time/10, [0, 1, 0]);
+
+	const normalMatrix=mat4.create();
+	mat4.invert(normalMatrix, modelViewMatrix);
+	mat4.transpose(normalMatrix, normalMatrix);
 
 	gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
 	gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 3, gl.FLOAT, false, 0, 0);
@@ -192,6 +214,7 @@ function drawScene(gl, programInfo, buffers, texture, time){
 
 	gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 	gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
+	gl.uniformMatrix4fv(programInfo.uniformLocations.normalMatrix, false, normalMatrix);
 
 	gl.uniform1f(programInfo.uniformLocations.time, time);
 
@@ -199,7 +222,7 @@ function drawScene(gl, programInfo, buffers, texture, time){
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 	gl.uniform1i(programInfo.uniformLocations.sampler, 0);
 
-	gl.drawElements(gl.LINE_STRIP, buffers.indicesSize, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, buffers.indicesSize, gl.UNSIGNED_SHORT, 0);
 }
 
 function initShaderProgram(gl, vsSource, fsSource){
