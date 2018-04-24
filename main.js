@@ -16,27 +16,38 @@ function main(){
 		uniform mat4 uProjectionMatrix;
 		uniform float uTime;
 
+		varying highp vec3 vNormal;
+
 		void main(void){
-			const float qh=0.5;
-			const float a=1.0;
+			const float qh=0.2;
+			const float a=2.0;
 			const float w=1.0;
 			const vec2 d=vec2(1.0, 0.0);
 			const float phi=1.0;
 			const float q=qh/(w*a);
 			float angle=dot(w*d, aVertexPosition.xz)+phi*uTime;
+			float c=cos(angle);
+			float s=sin(angle);
+			vNormal=normalize(vec3(
+				-d.x*w*a*c,
+				(1.0-q*w*a*s),
+				-d.y*w*a*c
+			));
 			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(
-				q*a*d.x*cos(angle),
-				-a*sin(angle),
-				q*a*d.y*cos(angle),
+				q*a*d.x*c,
+				-a*s,
+				q*a*d.y*c,
 				0.0
 			));
 		}`;
 
 	const fsSource=`
+		varying highp vec3 vNormal;
+
 		uniform sampler2D uSampler;
 
 		void main(void){
-			gl_FragColor=vec4(0.0, 1.0, 0.0, 1.0);
+			gl_FragColor=vec4((vec3(vNormal.x, vNormal.y, 0.0)+vec3(0.0, 0.0, 0.0))/2.0, 1.0);
 		}`;
 
 	const shaderProgram=initShaderProgram(gl, vsSource, fsSource);
@@ -66,9 +77,9 @@ function initBuffers(gl){
 	var indices=[];
 	var firstRow=true;
 	var verticesPerRow=null;
-	for(var z=-100; z<=100; z+=10){
+	for(var z=-100; z<=100; z+=5){
 		var firstCol=true;
-		for(var x=-100; x<=100; x+=10){
+		for(var x=-100; x<=100; x+=5){
 			positions=positions.concat([x, -5, z]);
 			if(!firstRow&&!firstCol){
 				const k=positions.length/3-1;
