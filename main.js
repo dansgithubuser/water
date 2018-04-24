@@ -15,30 +15,40 @@ function main(){
 		uniform mat4 uModelViewMatrix;
 		uniform mat4 uProjectionMatrix;
 		uniform float uTime;
+		uniform float uWaves[6*8];
 
 		varying highp vec3 vNormal;
 
 		void main(void){
-			const float qh=0.2;
-			const float a=2.0;
-			const float w=1.0;
-			const vec2 d=vec2(1.0, 0.0);
-			const float phi=1.0;
-			const float q=qh/(w*a);
-			float angle=dot(w*d, aVertexPosition.xz)+phi*uTime;
-			float c=cos(angle);
-			float s=sin(angle);
-			vNormal=normalize(vec3(
-				-d.x*w*a*c,
-				(1.0-q*w*a*s),
-				-d.y*w*a*c
-			));
-			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(
-				q*a*d.x*c,
-				-a*s,
-				q*a*d.y*c,
-				0.0
-			));
+			vNormal=vec3(0.0, 0.0, 0.0);
+			vec3 offset=vec3(0.0, 0.0, 0.0);
+			for(int i=0; i<8; ++i){
+				float qh=uWaves[6*i+0];
+				float a=uWaves[6*i+1];
+				float w=uWaves[6*i+2];
+				vec2 d=vec2(uWaves[6*i+3], uWaves[6*i+4]);
+				float phi=uWaves[6*i+5];
+				float q=qh/(w*a)/8.0;
+				float angle=dot(w*d, aVertexPosition.xz)+phi*uTime;
+				float c=cos(angle);
+				float s=sin(angle);
+				vNormal+=vec3(
+					-d.x*w*a*c,
+					-q*w*a*s,
+					-d.y*w*a*c
+				);
+				offset+=vec3(
+					q*a*d.x*c,
+					-a*s,
+					q*a*d.y*c
+				);
+			}
+			vNormal=vec3(
+				vNormal.x,
+				1.0-vNormal.y,
+				vNormal.z
+			);
+			gl_Position=uProjectionMatrix*uModelViewMatrix*(aVertexPosition+vec4(offset, 0.0));
 		}`;
 
 	const fsSource=`
@@ -61,10 +71,27 @@ function main(){
 			modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
 			time: gl.getUniformLocation(shaderProgram, 'uTime'),
 			sampler: gl.getUniformLocation(shaderProgram, 'uSampler'),
+			waves: gl.getUniformLocation(shaderProgram, 'uWaves'),
 		},
 	};
 	const buffers=initBuffers(gl);
 	const texture=loadTexture(gl, 'background.png');
+
+	gl.useProgram(programInfo.program);
+	var waves=[]
+	for(var i=0; i<8; ++i){
+		var qh=0.2;
+		var r=Math.random();
+		var a=0.5*r;
+		var w=0.5*r;
+		var theta=Math.random()*Math.PI*2/8;
+		var dx=Math.cos(theta);
+		var dy=Math.sin(theta);
+		var phi=Math.sqrt(9.8*w);
+		waves=waves.concat([qh, a, w, dx, dy, phi])
+	}
+	gl.uniform1fv(programInfo.uniformLocations.waves, new Float32Array(waves), 6*8);
+
 	function render(timeMs){
 		drawScene(gl, programInfo, buffers, texture, timeMs/1000);
 		requestAnimationFrame(render);
@@ -162,8 +189,6 @@ function drawScene(gl, programInfo, buffers, texture, time){
 	gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
 
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
-
-	gl.useProgram(programInfo.program);
 
 	gl.uniformMatrix4fv(programInfo.uniformLocations.projectionMatrix, false, projectionMatrix);
 	gl.uniformMatrix4fv(programInfo.uniformLocations.modelViewMatrix, false, modelViewMatrix);
