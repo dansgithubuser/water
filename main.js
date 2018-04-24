@@ -98,7 +98,7 @@ function main(){
 	var waves=[]
 	for(var i=0; i<8; ++i){
 		var qh=0.2;
-		var r=Math.random();
+		var r=0.5+1.5*Math.random();
 		var a=0.5*r;
 		var w=0.5*r;
 		var theta=Math.random()*Math.PI*2/8;
@@ -190,7 +190,10 @@ function loadTexture(gl, url){
 
 function drawScene(gl, programInfo, buffers, texture, time){
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
-	gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.clearDepth(1.0);
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+	gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 
 	const fieldOfView=Math.PI/4;
 	const aspect=gl.canvas.clientWidth/gl.canvas.clientHeight;
