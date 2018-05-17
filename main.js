@@ -14,15 +14,16 @@ const backgroundVs=`
 	attribute vec4 aPosition;
 	varying highp vec2 vCoord;
 	void main(void){
-		vCoord=(aPosition.xy+1.0)/2.0;
+		vCoord=(-aPosition.xy+1.0)/2.0;
 		gl_Position=aPosition;
 	}
 `;
 
 const backgroundFs=`
+	uniform sampler2D uBackground;
 	varying highp vec2 vCoord;
 	void main(void){
-		gl_FragColor=vec4(vCoord.x, vCoord.y, 0.0, 1.0);
+		gl_FragColor=texture2D(uBackground, vCoord);
 	}
 `;
 
@@ -37,6 +38,7 @@ function main(){
 		backgroundVs, backgroundFs,
 		{
 			attributes: {aPosition: 'vec4'},
+			texture: {name: 'uBackground', url: 'background.png'},
 		},
 	);
 	backgroundDrawer.setAttributes({
