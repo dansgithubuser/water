@@ -40,8 +40,13 @@ const waterVs=`
 const waterFs=`
 	uniform sampler2D uBackground;
 	varying highp vec3 vCoord;
+
+	highp float hash(vec2 p){
+		return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453123);
+	}
+
 	void main(void){
-		gl_FragColor=texture2D(uBackground, vec2(vCoord.x, -vCoord.y+1.0-vCoord.z))*0.5;
+		gl_FragColor=vec4(hash(vCoord.xy), 0.0, 0.0, 1.0);
 	}
 `;
 
