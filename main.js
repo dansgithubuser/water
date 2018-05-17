@@ -30,18 +30,18 @@ const backgroundFs=`
 
 const waterVs=`
 	attribute vec4 aPosition;
-	varying highp vec2 vCoord;
+	varying highp vec3 vCoord;
 	void main(void){
-		vCoord=(-aPosition.xy+1.0)/2.0;
+		vCoord=vec3(-0.5*aPosition.x+0.5, -0.5*aPosition.y+0.5, aPosition.z);
 		gl_Position=aPosition;
 	}
 `;
 
 const waterFs=`
 	uniform sampler2D uBackground;
-	varying highp vec2 vCoord;
+	varying highp vec3 vCoord;
 	void main(void){
-		gl_FragColor=texture2D(uBackground, vCoord)*0.5;
+		gl_FragColor=texture2D(uBackground, vec2(vCoord.x, -vCoord.y+1.0-vCoord.z))*0.5;
 	}
 `;
 
@@ -70,7 +70,7 @@ function main(){
 		},
 	);
 	waterDrawer.setAttributes({
-		aPosition: [[-1, -1], [1, -1], [-1, 0.1], [1, 0.1]],
+		aPosition: [[-1, -1, 0.1], [1, -1, 0.1], [-1, 0.1, 0.1], [1, 0.1, 0.1]],
 	});
 	requestAnimationFrame(render);
 }

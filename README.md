@@ -7,7 +7,3 @@ This was originally created as an exploration of https://github.com/mdn/webgl-ex
 - The article is terse, but I think that's what they did: Gerstner waves in vertex shader, sinusoidal waves in fragment. They mention keeping the wavelength large enough given how many samples you have, but I found even if I did that there were interpolation artifacts. Not sure why. The source code accompanying is very proprietary and doesn't seem to cut to the chase, at first glance anyway.
 
 Currently trying to make something like this: https://www.shadertoy.com/view/Ms2SD1.
-
-todo:
-- basic reflections
-- reflections based on shadertoy example
