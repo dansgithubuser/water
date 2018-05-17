@@ -45,8 +45,19 @@ const waterFs=`
 		return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453123);
 	}
 
+	highp float noise(vec2 p){
+		highp vec2 i=floor(p);
+		highp vec2 f=fract(p);
+		highp vec2 u=f*f*(3.0-2.0*f);
+		return mix(
+			mix(hash(i+vec2(0.0, 0.0)), hash(i+vec2(1.0, 0.0)), u.x),
+			mix(hash(i+vec2(0.0, 1.0)), hash(i+vec2(1.0, 1.0)), u.x),
+			u.y
+		);
+	}
+
 	void main(void){
-		gl_FragColor=vec4(hash(vCoord.xy), 0.0, 0.0, 1.0);
+		gl_FragColor=vec4(noise(vCoord.xy*40.0), 0.0, 0.0, 1.0);
 	}
 `;
 
