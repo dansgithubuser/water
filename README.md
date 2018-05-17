@@ -11,6 +11,5 @@ The effort continues, here's a nice shader with readable code: https://www.shade
 Currently under construction. I'm interested in creating a nice WebGL skeleton so playing with shaders isn't so hard.
 
 todo:
-- express screen size
 - texture
 - more water experiments
