@@ -11,7 +11,9 @@ class Drawer{
 			alert('unable to initialize shader program: '+gl.getProgramInfoLog(this.program));
 		this.attributes={};
 		if('attributes' in options) for(var attribute in options.attributes){
-			this.attributes[attribute]=gl.createBuffer();
+			this.attributes[attribute]={buffer: gl.createBuffer()};
+			var loc=gl.getAttribLocation(this.program, attribute);
+			gl.enableVertexAttribArray(loc);
 		}
 		this.texture=null;
 		if('texture' in options){
@@ -22,20 +24,24 @@ class Drawer{
 	setAttributes(attributes){
 		const gl=this.gl;
 		for(var attribute in attributes){
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[attribute]);
+			this.attributes[attribute].values=attributes[attribute];
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[attribute].buffer);
 			var flattened=[].concat(...attributes[attribute]);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flattened), gl.STATIC_DRAW);
-			var loc=gl.getAttribLocation(this.program, attribute);
-			gl.vertexAttribPointer(loc, attributes[attribute][0].length, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(loc);
-			this.vertices=attributes[attribute].length;
 		}
 	}
 
 	draw(primitive){
 		const gl=this.gl;
 		gl.useProgram(this.program);
-		gl.drawArrays(primitive, 0, this.vertices);
+		var vertices=0;
+		for(var attribute in this.attributes){
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[attribute].buffer);
+			var loc=gl.getAttribLocation(this.program, attribute);
+			gl.vertexAttribPointer(loc, this.attributes[attribute].values[0].length, gl.FLOAT, false, 0, 0);
+			vertices=this.attributes[attribute].values.length;
+		}
+		gl.drawArrays(primitive, 0, vertices);
 	}
 
 	_createShader(type, source){

@@ -6,10 +6,8 @@ This was originally created as an exploration of https://github.com/mdn/webgl-ex
 - Following, normal calculation should be done in fragment shader. In which case I don't think you can do Gerstner waves.
 - The article is terse, but I think that's what they did: Gerstner waves in vertex shader, sinusoidal waves in fragment. They mention keeping the wavelength large enough given how many samples you have, but I found even if I did that there were interpolation artifacts. Not sure why. The source code accompanying is very proprietary and doesn't seem to cut to the chase, at first glance anyway.
 
-The effort continues, here's a nice shader with readable code: https://www.shadertoy.com/view/Ms2SD1.
-
-Currently under construction. I'm interested in creating a nice WebGL skeleton so playing with shaders isn't so hard.
+Currently trying to make something like this: https://www.shadertoy.com/view/Ms2SD1.
 
 todo:
-- two programs
-- more water experiments
+- basic reflections
+- reflections based on shadertoy example
