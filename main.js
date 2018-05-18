@@ -32,7 +32,7 @@ const waterVs=`
 	attribute vec4 aPosition;
 	varying highp vec3 vCoord;
 	void main(void){
-		vCoord=vec3(-0.5*aPosition.x+0.5, -0.5*aPosition.y+0.5, aPosition.z);
+		vCoord=aPosition.xyz;
 		gl_Position=aPosition;
 	}
 `;
@@ -57,7 +57,8 @@ const waterFs=`
 	}
 
 	void main(void){
-		gl_FragColor=vec4(noise(vCoord.xy*40.0), 0.0, 0.0, 1.0);
+		highp vec2 v=vec2(vCoord.x/8.0, vCoord.y)/(vCoord.y-vCoord.z);
+		gl_FragColor=vec4(noise(v*40.0), 0.0, 0.0, 1.0);
 	}
 `;
 
