@@ -72,9 +72,19 @@ const waterFs=`
 		return h;
 	}
 
+	highp vec3 normal(vec2 p){
+		const highp float e=0.001;
+		highp vec3 n;
+		n.y=water(p);
+		n.x=water(p+vec2(  e, 0.0))-n.y;
+		n.z=water(p+vec2(0.0,   e))-n.y;
+		n.y=e;
+		return normalize(n);
+	}
+
 	void main(void){
-		highp vec2 v=vec2(vCoord.x/8.0, vCoord.y)/(vCoord.y-vCoord.z);
-		gl_FragColor=vec4(water(v*40.0), 0.0, 0.0, 1.0);
+		highp vec2 p=vec2(vCoord.x/8.0, vCoord.y)/(vCoord.y-vCoord.z);
+		gl_FragColor=vec4(normal(p*40.0), 1.0);
 	}
 `;
 
