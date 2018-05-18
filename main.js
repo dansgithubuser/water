@@ -7,6 +7,7 @@ function render(timeMs){
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	backgroundDrawer.draw(gl.TRIANGLE_STRIP);
+	waterDrawer.setUniform('uTime', timeMs/1000);
 	waterDrawer.draw(gl.TRIANGLE_STRIP);
 	requestAnimationFrame(render);
 }
@@ -39,6 +40,7 @@ const waterVs=`
 
 const waterFs=`
 	uniform sampler2D uBackground;
+	uniform highp float uTime;
 	varying highp vec3 vCoord;
 
 	highp float hash(vec2 p){
@@ -59,10 +61,13 @@ const waterFs=`
 	highp float water(vec2 p){
 		highp float h=0.0;
 		highp float amplitude=0.5;
+		highp float f=1.0;
+		const highp mat2 m=mat2(1.6, 1.2, -1.2, 1.6);
 		for(int i=0; i<4; ++i){
-			h+=amplitude*noise(p);
+			h+=amplitude*noise(p+uTime*f);
 			amplitude*=0.5;
-			p*=2.0;
+			p*=m;
+			f*=2.0;
 		}
 		return h;
 	}
@@ -95,6 +100,7 @@ function main(){
 		{
 			attributes: {aPosition: 'vec4'},
 			texture: {name: 'uBackground', url: 'background.png'},
+			uniforms: {'uTime': 0},
 		},
 	);
 	waterDrawer.setAttributes({

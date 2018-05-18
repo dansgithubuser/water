@@ -19,6 +19,11 @@ class Drawer{
 		if('texture' in options){
 			this.texture=this._createTexture(options.texture.url);
 		}
+		this.uniforms={};
+		if('uniforms' in options) for(var uniform in options.uniforms){
+			this.uniforms[uniform]=gl.getUniformLocation(this.program, uniform);
+			this.setUniform(uniform, options.uniforms[uniform]);
+		}
 	}
 
 	setAttributes(attributes){
@@ -29,6 +34,12 @@ class Drawer{
 			var flattened=[].concat(...attributes[attribute]);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flattened), gl.STATIC_DRAW);
 		}
+	}
+
+	setUniform(name, value){
+		const gl=this.gl;
+		gl.useProgram(this.program);
+		gl.uniform1f(this.uniforms[name], value);
 	}
 
 	draw(primitive){
