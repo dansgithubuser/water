@@ -60,7 +60,7 @@ const waterFs=`
 
 	highp float water(vec2 p){
 		highp float h=0.0;
-		highp float amplitude=0.5;
+		highp float amplitude=0.01;
 		highp float f=1.0;
 		const highp mat2 m=mat2(1.6, 1.2, -1.2, 1.6);
 		for(int i=0; i<4; ++i){
@@ -84,7 +84,12 @@ const waterFs=`
 
 	void main(void){
 		highp vec2 p=vec2(vCoord.x/8.0, vCoord.y)/(vCoord.y-vCoord.z);
-		gl_FragColor=vec4(normal(p*40.0), 1.0);
+		highp vec3 n=normal(p*40.0);
+		highp vec3 r=vec3(vCoord.x, vCoord.y-2.0*vCoord.z, 1.0);
+		r=reflect(r, n);
+		highp vec4 color=texture2D(uBackground, vec2(-0.5*r.x+0.5, -0.5*r.y+0.5));
+		color=mix(color, vec4(0.01, 0.05, 0.2, 1.0), dot(r, n));
+		gl_FragColor=color;
 	}
 `;
 
