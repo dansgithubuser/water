@@ -56,9 +56,20 @@ const waterFs=`
 		);
 	}
 
+	highp float water(vec2 p){
+		highp float h=0.0;
+		highp float amplitude=0.5;
+		for(int i=0; i<4; ++i){
+			h+=amplitude*noise(p);
+			amplitude*=0.5;
+			p*=2.0;
+		}
+		return h;
+	}
+
 	void main(void){
 		highp vec2 v=vec2(vCoord.x/8.0, vCoord.y)/(vCoord.y-vCoord.z);
-		gl_FragColor=vec4(noise(v*40.0), 0.0, 0.0, 1.0);
+		gl_FragColor=vec4(water(v*40.0), 0.0, 0.0, 1.0);
 	}
 `;
 
