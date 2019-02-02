@@ -43,11 +43,11 @@ const waterFs=`
 	uniform highp float uTime;
 	varying highp vec3 vCoord;
 
-	highp float hash(vec2 p){
+	highp float hash(highp vec2 p){
 		return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453123);
 	}
 
-	highp float noise(vec2 p){
+	highp float noise(highp vec2 p){
 		highp vec2 i=floor(p);
 		highp vec2 f=fract(p);
 		highp vec2 u=f*f*(3.0-2.0*f);
@@ -58,7 +58,7 @@ const waterFs=`
 		);
 	}
 
-	highp float water(vec2 p){
+	highp float water(highp vec2 p){
 		highp float h=0.0;
 		highp float amplitude=0.01;
 		highp float f=1.0;
@@ -72,7 +72,7 @@ const waterFs=`
 		return h;
 	}
 
-	highp vec3 normal(vec2 p){
+	highp vec3 normal(highp vec2 p){
 		const highp float e=0.001;
 		highp vec3 n;
 		n.y=water(p);
